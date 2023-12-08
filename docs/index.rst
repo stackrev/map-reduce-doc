@@ -20,17 +20,18 @@ For information on using the MapReduce Subnet, see :ref:`user_doc`.
 For information on which functions in MapReduce Subnet, see :ref:`functions`.
 
 .. toctree::
-   :caption: What is MapReduce Subnet?:
+   :caption: User Documentation:
 
-   introduction/quickstart
-   faq
+   user_doc/getting_started
+   user_doc/tutorial
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Functions:
 
-   user_doc/index
-   functions/index
+   functions/init_process_group
+   functions/broadcast
+   functions/all_reduce
 
 Indices and tables
 ==================
