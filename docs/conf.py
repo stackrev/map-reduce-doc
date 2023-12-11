@@ -183,6 +183,8 @@ epub_exclude_files = ['search.html']
 # add sourcecode to path
 import sys, os
 sys.path.insert(0, os.path.abspath('../src'))
+autodoc_mock_imports = ['torch', 'bittensor', 'netifaces', 'psutil', 'codecs', 'traceback', 'random']
+
  
 ############################
 # SETUP THE RTD LOWER-LEFT #

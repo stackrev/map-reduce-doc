@@ -13,11 +13,11 @@ Welcome to MapReduce Subnet's documentation!
 Welcome! MapReduce Subnet's documentation is split into 2 main parts:
 
 - :ref:`user_doc`
-- :ref:`functions`
+- :ref:`peer`
 
 For information on using the MapReduce Subnet, see :ref:`user_doc`.
 
-For information on which functions in MapReduce Subnet, see :ref:`functions`.
+For information on which functions in MapReduce Subnet, see :ref:`peer`.
 
 .. toctree::
    :caption: User Documentation:
@@ -27,11 +27,9 @@ For information on which functions in MapReduce Subnet, see :ref:`functions`.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Functions:
+   :caption: Source Code
 
-   functions/init_process_group
-   functions/broadcast
-   functions/all_reduce
+   peer
 
 Indices and tables
 ==================
