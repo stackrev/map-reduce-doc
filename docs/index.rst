@@ -12,18 +12,17 @@ Welcome to MapReduce Subnet's documentation!
 
 Welcome! MapReduce Subnet's documentation is split into 2 main parts:
 
-- :ref:`user_doc`
+- :ref:`readme`
 - :ref:`peer`
 
-For information on using the MapReduce Subnet, see :ref:`user_doc`.
+For information on using the MapReduce Subnet, see :ref:`readme`.
 
 For information on which functions in MapReduce Subnet, see :ref:`peer`.
 
 .. toctree::
-   :caption: User Documentation:
+   :caption: ReadMe
 
-   user_doc/getting_started
-   user_doc/tutorial
+   readme
 
 .. toctree::
    :maxdepth: 2
