@@ -1,0 +1,597 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="es" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="es" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Bittensor Map Reduce &mdash; documentación de MapReduce Subnet - 1.0.0</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/translations.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="next" title="peer.py" href="peer.html" />
+    <link rel="prev" title="Welcome to MapReduce Subnet’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> MapReduce Subnet
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">ReadMe</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Bittensor Map Reduce</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#install-dependencies">Install Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#running-miner">Running Miner</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-miner-script">Running Miner Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#running-validator">Running Validator</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prerequisites-1">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuration-with-validator-config-json">Configuration with validator.config.json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-validator-script">Running Validator Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#tutorial">Tutorial</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#user-guide">User Guide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#license">License</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Source Code</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="peer.html">peer.py</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">MapReduce Subnet</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Bittensor Map Reduce</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/maltfield/rtd-github-pages/blob/master/docs/readme.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="bittensor-map-reduce">
+<span id="readme"></span><h1>Bittensor Map Reduce<a class="headerlink" href="#bittensor-map-reduce" title="Enlace permanente a este encabezado">¶</a></h1>
+<div class="docutils container">
+<p><a class="reference external" href="https://discord.com/channels/799672011265015819/1163969538191269918"><img alt="Discord Chat" src="https://img.shields.io/discord/308323056592486420.svg" /></a> <a class="reference external" href="https://opensource.org/licenses/MIT"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" /></a></p>
+<p class="rubric" id="the-incentivized-internet">The Incentivized Internet</p>
+<p><a class="reference external" href="https://discord.gg/bittensor">Discord</a> •
+<a class="reference external" href="https://taostats.io/">Network</a> •
+<a class="reference external" href="https://bittensor.com/whitepaper">Research</a></p>
+</div>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Enlace permanente a este encabezado">¶</a></h2>
+<p>The Bittensor Subnet 10 (Map Reduce Subnet) incentivizes miners by
+offering rewards for contributing network bandwidth and memory
+resources.</p>
+<p>A broadcast subnet leverages the bandwidth of multiple peers to transfer
+large data from point to A to multiple point Bs without needing to
+leverage large quantities of your own upload. The concept is simple, a
+large file D can be split into multiple chunks and sent to N
+intermediate peers (usually with redundancy) and then forwarded onward
+to B additional endpoints in an N by B full bipartite fashion. The
+inverse operation is also valuable, where data DxB large data files can
+be aggregated from B peers by leveraging the bandwidth of N
+intermediaries.</p>
+<p>In the forward ‘map’ operation a file D is broken into chunks and split
+across the N peers each of whom then forwards their chunk to B endpoints
+allowing each downloading peer to recieve the full file of size D with
+the sending peer needing an upload of only size D. The backward
+operation, ‘reduce’, acts in reverse, the K receiving peers fan out
+their response data D in chunks to the N intermediary peers who then
+aggregate the chunks from each other and finally send the sum of total
+chunks back to the sending peer A.</p>
+<p>The map-reduce cycle is essential for reducing the bandwidth by a factor
+of K on the running peers which is essential for the training of machine
+learning models in a distributed setting. This template is a protoype
+for incentivizing the speed at which this operation can take place by
+validating both the consistency and operation speed of a map-reduce.</p>
+</section>
+<hr class="docutils" />
+<section id="how-it-works">
+<h2>How it works<a class="headerlink" href="#how-it-works" title="Enlace permanente a este encabezado">¶</a></h2>
+<figure class="align-default" id="id2">
+<img alt="Map Reduce Diagram" src="_images/map_reduce.svg" /><figcaption>
+<p><span class="caption-text">Map Reduce Diagram</span><a class="headerlink" href="#id2" title="Enlace permanente a esta imagen">¶</a></p>
+</figcaption>
+</figure>
+<p>The diagram illustrates the workflow of a distributed map-reduce system
+with an integrated validation mechanism:</p>
+<p>Peer Gradient Splitting:</p>
+<p>Peers do machine training and generate unique gradients. These gradients
+are divided into segments (Seg1, Seg2, Seg3 in the diagram), which are
+then distributed among the miners (Miner1, Miner2, Miner3 in the
+diagram).</p>
+<p>Miner Gradient Processing:</p>
+<p>Each miner receives segments from the peers. The miners perform
+computations on these segments, which could involve averaging, sum or
+other forms of data processing. After processing, each miner holds an
+averaged gradient segment, denoted as g^ (1) for Miner1, g^ (2) for
+Miner2, and g^ (3) for Miner3.</p>
+<p>Gradient Broadcasting and Aggregation:</p>
+<p>The miners then broadcast their processed gradient segments back to all
+peers. Each peer collects these averaged gradient segments,
+reconstructing the full set of averaged gradients, which could then be
+used for further computations or iterations within a larger algorithm.</p>
+<p>Validation:</p>
+<p>A validator independently samples small subsets of data from both the
+peers and the miners. The validator’s role is to confirm that the
+miners’ computations are accurate and that the integrity of the data
+remains intact through the process. This system ensures the distributed
+processing of data with a check-and-balance system provided by the
+validator. This validation step is crucial for maintaining the
+reliability of the distributed computation, especially in decentralized
+or trustless environments where the computation’s correctness cannot be
+taken for granted.</p>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Enlace permanente a este encabezado">¶</a></h2>
+<p>This repository requires python3.8 or higher. To install, simply clone
+this repository and install the requirements.</p>
+<section id="install-dependencies">
+<h3>Install Dependencies<a class="headerlink" href="#install-dependencies" title="Enlace permanente a este encabezado">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/dream-well/map-reduce-subnet
+<span class="nb">cd</span><span class="w"> </span>map-reduce-subnet
+python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</pre></div>
+</div>
+</section>
+</section>
+<section id="running-miner">
+<h2>Running Miner<a class="headerlink" href="#running-miner" title="Enlace permanente a este encabezado">¶</a></h2>
+<section id="prerequisites">
+<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Enlace permanente a este encabezado">¶</a></h3>
+<p>For running a miner, you need enough resources. The minimal requirements
+for running a miner are</p>
+<ul class="simple">
+<li><p>Public IP address</p></li>
+<li><p>Network bandwidth: 1Gbps</p></li>
+<li><p>RAM: 10GB</p></li>
+</ul>
+<p>Recommended hardware requirement: - Network bandwidth: 10Gbps - RAM:
+32GB</p>
+<p>Note: Higher network bandwidth and RAM can lead to more rewards.</p>
+</section>
+<section id="running-miner-script">
+<h3>Running Miner Script<a class="headerlink" href="#running-miner-script" title="Enlace permanente a este encabezado">¶</a></h3>
+<p>Run the miner using the following script:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># To run the miner</span>
+python3<span class="w"> </span>neurons/miner.py
+<span class="w">    </span>--netuid<span class="w"> </span><span class="m">10</span><span class="w">  </span><span class="c1"># The subnet id you want to connect to</span>
+<span class="w">    </span>--subtensor.network<span class="w"> </span>finney<span class="w">  </span><span class="c1"># blockchain endpoint you want to connect</span>
+<span class="w">    </span>--wallet.name<span class="w"> </span>&lt;your<span class="w"> </span>miner<span class="w"> </span>wallet&gt;<span class="w"> </span><span class="c1"># name of your wallet</span>
+<span class="w">    </span>--wallet.hotkey<span class="w"> </span>&lt;your<span class="w"> </span>miner<span class="w"> </span>hotkey&gt;<span class="w"> </span><span class="c1"># hotkey name of your wallet</span>
+<span class="w">    </span>--logging.debug<span class="w"> </span><span class="c1"># Run in debug mode, alternatively --logging.trace for trace mode</span>
+</pre></div>
+</div>
+<p>Important Note: Operating multiple miners from a single machine (using
+the same IP address) may result in reduced rewards. For optimal
+performance and reward maximization, it is recommended to run each miner
+on a separate machine.</p>
+</section>
+</section>
+<section id="running-validator">
+<h2>Running Validator<a class="headerlink" href="#running-validator" title="Enlace permanente a este encabezado">¶</a></h2>
+<p>Validators oversee data transfer processes and ensure the accuracy and
+integrity of data transfers.</p>
+<section id="prerequisites-1">
+<span id="id1"></span><h3>Prerequisites<a class="headerlink" href="#prerequisites-1" title="Enlace permanente a este encabezado">¶</a></h3>
+<ol class="arabic simple">
+<li><p>(Optional) I recommend to run subtensor instance locally</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/opentensor/subtensor.git
+<span class="nb">cd</span><span class="w"> </span>subtensor
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>--detach
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>For validating, you need to setup benchmark bots first.</p></li>
+</ol>
+<p><strong>Setup Benchmark Bots</strong></p>
+<p>Validators should set up at least 3 benchmark bots (more bots lead to
+faster validation). You can install one of the bots directly on your
+validator machine. Each bot should run on a different machine with a
+minimum of 4GB RAM and 1Gbps network bandwidth.</p>
+<p>Minimum hardware requirement: - RAM: 4GB - Network: 1Gbps</p>
+<p>Recommended hardware requirement: - RAM: 8GB - Network: 10Gbps</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># To run the benchmark bot</span>
+python3<span class="w"> </span>neurons/benchmark.py
+<span class="w">    </span>--subtensor.network<span class="w"> </span><span class="nb">local</span><span class="w">  </span><span class="c1"># blockchain endpoint you want to connect</span>
+<span class="w">    </span>--wallet.name<span class="w"> </span>&lt;your<span class="w"> </span>benchmark<span class="w"> </span>wallet&gt;<span class="w"> </span><span class="c1"># name of your wallet</span>
+<span class="w">    </span>--wallet.hotkey<span class="w"> </span>&lt;your<span class="w"> </span>benchmark<span class="w"> </span>hotkey&gt;<span class="w"> </span><span class="c1"># hotkey name of your wallet, you can create a new wallet for benchmark and register in validator.config.json</span>
+<span class="w">    </span>--validator.uid<span class="w"> </span>&lt;your<span class="w"> </span>validator<span class="w"> </span>uid&gt;<span class="w"> </span><span class="c1"># your validator uid</span>
+</pre></div>
+</div>
+</section>
+<section id="configuration-with-validator-config-json">
+<h3>Configuration with validator.config.json<a class="headerlink" href="#configuration-with-validator-config-json" title="Enlace permanente a este encabezado">¶</a></h3>
+<p>Modify validator.config.json with appropriate settings, including
+hotkeys for benchmark bots.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>example.validator.config.json<span class="w"> </span>validator.config.json
+</pre></div>
+</div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;subtensor.network&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;local&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;netuid&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;wallet.name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your wallet name&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;wallet.hotkey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your validator hotkey&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;max_bandwidth&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10737418240</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;auto_update&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;patch&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;benchmark_hotkeys&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;&quot;</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>max_bandwidth: The maximum bandwidth of your benchmark bots. (default
+10 Gb)</p></li>
+<li><p>benchmark_hotkeys: The hotkeys of your benchmark bots. (default 5
+bots)</p></li>
+</ul>
+</section>
+<section id="running-validator-script">
+<h3>Running Validator Script<a class="headerlink" href="#running-validator-script" title="Enlace permanente a este encabezado">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>neurons
+<span class="c1"># To run the validator</span>
+python3<span class="w"> </span>validator.py
+<span class="w">    </span>--netuid<span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="c1"># The subnet id you want to connect to</span>
+<span class="w">    </span>--subtensor.network<span class="w"> </span><span class="nb">local</span><span class="w"> </span><span class="c1"># blockchain endpoint you want to connect</span>
+<span class="w">    </span>--wallet.name<span class="w"> </span>&lt;your<span class="w"> </span>validator<span class="w"> </span>wallet&gt;<span class="w">  </span><span class="c1"># name of your wallet</span>
+<span class="w">    </span>--wallet.hotkey<span class="w"> </span>&lt;your<span class="w"> </span>validator<span class="w"> </span>hotkey&gt;<span class="w"> </span><span class="c1"># hotkey name of your wallet</span>
+<span class="w">    </span>--logging.debug<span class="w"> </span><span class="c1"># Run in debug mode, alternatively --logging.trace for trace mode</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="tutorial">
+<h2>Tutorial<a class="headerlink" href="#tutorial" title="Enlace permanente a este encabezado">¶</a></h2>
+<section id="user-guide">
+<h3>User Guide<a class="headerlink" href="#user-guide" title="Enlace permanente a este encabezado">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/dream-well/map-reduce-subnet
+<span class="nb">cd</span><span class="w"> </span>map-reduce-subnet
+python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">peer.peer</span> <span class="kn">import</span> <span class="n">Peer</span>
+<span class="kn">import</span> <span class="nn">bittensor</span> <span class="k">as</span> <span class="nn">bt</span>
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span>
+
+<span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">()</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--validator.uid&#39;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Validator UID&#39;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--netuid&#39;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Map Reduce Subnet NetUID&#39;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--rank&#39;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Rank of the peer&#39;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--count&#39;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Number of peers&#39;</span><span class="p">)</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">config</span><span class="p">(</span>
+    <span class="n">parser</span><span class="o">=</span><span class="n">parser</span>
+<span class="p">)</span>
+
+<span class="n">wallet</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">wallet</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># size for testing, set to 100 MB</span>
+<span class="n">test_size</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span>
+
+<span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">rank</span><span class="p">,</span> <span class="n">peer_count</span><span class="p">,</span> <span class="n">bandwidth</span><span class="p">,</span> <span class="n">wallet</span><span class="p">,</span> <span class="n">validator_uid</span><span class="p">,</span> <span class="n">netuid</span><span class="p">,</span> <span class="n">network</span> <span class="p">):</span>
+    <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔷 Starting peer with rank </span><span class="si">{</span><span class="n">rank</span><span class="si">}</span><span class="s2"> netuid: </span><span class="si">{</span><span class="n">netuid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># Initialize Peer instance</span>
+    <span class="n">peer</span> <span class="o">=</span> <span class="n">Peer</span><span class="p">(</span><span class="n">rank</span><span class="p">,</span> <span class="n">peer_count</span><span class="p">,</span> <span class="n">bandwidth</span><span class="p">,</span> <span class="n">wallet</span><span class="p">,</span> <span class="n">validator_uid</span><span class="p">,</span> <span class="n">netuid</span><span class="p">,</span> <span class="n">network</span><span class="p">)</span>
+
+    <span class="c1"># Initialize process group with the fetched configuration</span>
+    <span class="n">peer</span><span class="o">.</span><span class="n">init_process_group</span><span class="p">()</span>
+
+    <span class="n">weights</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">rank</span> <span class="o">--</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># if it is the first peer</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">test_size</span> <span class="o">/</span> <span class="mi">4</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">peer</span><span class="o">.</span><span class="n">broadcast</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">peer</span><span class="o">.</span><span class="n">broadcast</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+
+    <span class="n">epoch</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="c1"># Your training loop here</span>
+    <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Peer </span><span class="si">{</span><span class="n">rank</span><span class="si">}</span><span class="s2"> is training...&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epoch</span><span class="p">):</span>
+
+        <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🟢 Epoch: </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># Replace this with actual training code</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+
+        <span class="c1"># After calculating gradients</span>
+        <span class="n">gradients</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">test_size</span> <span class="o">/</span> <span class="mi">4</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rank</span> <span class="o">--</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">gradients</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">test_size</span> <span class="o">/</span> <span class="mi">4</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="mi">3</span>
+
+        <span class="c1"># All-reducing the gradients</span>
+        <span class="n">gradients</span> <span class="o">=</span> <span class="n">peer</span><span class="o">.</span><span class="n">all_reduce</span><span class="p">(</span><span class="n">gradients</span><span class="p">)</span>
+
+    <span class="n">peer</span><span class="o">.</span><span class="n">destroy_process_group</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Peer </span><span class="si">{</span><span class="n">rank</span><span class="si">}</span><span class="s2"> has finished training.&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">--</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">train</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">peer_count</span><span class="p">,</span> <span class="n">test_size</span><span class="p">,</span> <span class="n">wallet</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">validator</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">netuid</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">subtensor</span><span class="o">.</span><span class="n">network</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>User also can test the map-reduce subnet by running test.py</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>test/test.py<span class="w"> </span>--subtensor.network<span class="w"> </span><span class="nb">local</span><span class="w"> </span>--wallet.name<span class="w"> </span>&lt;wallet<span class="w"> </span>name&gt;<span class="w"> </span>--wallet.hotkey<span class="w"> </span>&lt;hotkey<span class="w"> </span>name&gt;<span class="w"> </span>--validator.uid<span class="w"> </span>&lt;validator<span class="w"> </span>uid&gt;
+</pre></div>
+</div>
+</section>
+<section id="license">
+<h3>License<a class="headerlink" href="#license" title="Enlace permanente a este encabezado">¶</a></h3>
+<p>This repository is licensed under the MIT License.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># The MIT License (MIT)
+# Copyright © 2023 ChainDude
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+# documentation files (the “Software”), to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+# and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+# the Software.
+
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+# THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="peer.html" class="btn btn-neutral float-right" title="peer.py" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to MapReduce Subnet’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2023, Chain Dude
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span class="fa fa-book"> Read the Docs</span>
+      v: dev
+      <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+      
+      <dl>
+        <dt>Languages</dt>
+        
+          
+          <dd><a href="/map-reduce-doc/en/dev/">en</a></dd>
+          
+        
+           <strong> 
+          <dd><a href="/map-reduce-doc/es/dev/">es</a></dd>
+           </strong> 
+        
+      </dl>
+      
+      
+      <dl>
+        <dt>Versions</dt>
+        
+           <strong> 
+          <dd><a href="/map-reduce-doc/es/dev/">dev</a></dd>
+           </strong> 
+        
+          
+          <dd><a href="/map-reduce-doc/es/master/">master</a></dd>
+          
+        
+      </dl>
+      
+      
+      <dl>
+        <dt>Downloads</dt>
+        
+          <dd><a href="/map-reduce-doc/es/dev/MapReduce Subnet-docs_es_dev.pdf">pdf</a></dd>
+        
+          <dd><a href="/map-reduce-doc/es/dev/MapReduce Subnet-docs_es_dev.epub">epub</a></dd>
+        
+      </dl>
+      
+      
+      <hr/>
+      <a href="https://tech.michaelaltfield.net/2020/07/18/sphinx-rtd-github-pages-1/">Continuous Documentation</a> hosting provided by <a href="https://pages.github.com/">GitHub Pages</a>.
+ 
+    </div>
+  </div>
+
+ 
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

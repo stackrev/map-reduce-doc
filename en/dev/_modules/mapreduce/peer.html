@@ -1,0 +1,592 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mapreduce.peer &mdash; MapReduce Subnet 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> MapReduce Subnet
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                dev
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">ReadMe</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">Bittensor Map Reduce</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Source Code</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../peer.html">peer.py</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MapReduce Subnet</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>mapreduce.peer</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mapreduce.peer</h1><div class="highlight"><pre>
+<span></span><span class="c1"># peerlib.py</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">torch.distributed</span> <span class="k">as</span> <span class="nn">dist</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">ceil</span>
+<span class="kn">import</span> <span class="nn">bittensor</span> <span class="k">as</span> <span class="nn">bt</span>
+<span class="kn">import</span> <span class="nn">mapreduce</span>
+<span class="c1"># from mapreduce.utils import get_my_version, set_gloo_socket_ifname, chunk_with_padding, human_readable_size, merge_chunks</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span>
+<span class="kn">import</span> <span class="nn">gc</span>
+
+<div class="viewcode-block" id="Peer"><a class="viewcode-back" href="../../peer.html#mapreduce.peer.Peer">[docs]</a><span class="k">class</span> <span class="nc">Peer</span><span class="p">:</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Constructor </span>
+<span class="sd">    </span>
+<span class="sd">    rank (int, required): Rank of the current process (it should be a number between 1 and peer_count). </span>
+<span class="sd">    peer_count(int, required):  Number of peers participating in the job. </span>
+<span class="sd">    bandwidth(int, required): Maximum size of the job in bytes.</span>
+<span class="sd">    wallet(bt.wallet, required): Wallet object containing the hotkey and coldkey.</span>
+<span class="sd">    validator_uid: Validator UID to connect to.</span>
+<span class="sd">    network: The subtensor network flag. The likely choices are: </span>
+<span class="sd">        -- finney (main network) </span>
+<span class="sd">        -- test (test network) </span>
+<span class="sd">        -- local (local running network) If this option is set it overloads subtensor.chain_endpoint with an entry point node from that network.</span>
+<span class="sd">    port_range: Port range for gloo, should be allowed in firewall.</span>
+<span class="sd">    benchmark_max_size: Maximum size of the benchmark in bytes.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rank</span><span class="p">,</span> <span class="n">peer_count</span><span class="p">,</span> <span class="n">bandwidth</span><span class="p">,</span> <span class="n">wallet</span><span class="p">:</span> <span class="n">bt</span><span class="o">.</span><span class="n">wallet</span><span class="p">,</span> <span class="n">validator_uid</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">network</span> <span class="o">=</span> <span class="s1">&#39;finney&#39;</span><span class="p">,</span> <span class="n">port_range</span> <span class="o">=</span> <span class="s2">&quot;9000:9010&quot;</span><span class="p">,</span> <span class="n">benchmark_max_size</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+        
+        <span class="n">netuid</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="k">assert</span> <span class="n">rank</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Rank should not be zero&quot;</span>
+        
+        <span class="n">metagraph</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">metagraph</span><span class="p">(</span><span class="n">netuid</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">)</span>
+        <span class="n">metagraph</span><span class="o">.</span><span class="n">sync</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axons</span> <span class="o">=</span> <span class="n">metagraph</span><span class="o">.</span><span class="n">axons</span>
+
+        <span class="k">if</span> <span class="n">validator_uid</span> <span class="o">&gt;=</span>  <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">validator_uid</span> <span class="o">=</span> <span class="n">validator_uid</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">validator_uid</span> <span class="o">=</span> <span class="mi">0</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">hotkey</span> <span class="o">=</span> <span class="n">wallet</span><span class="o">.</span><span class="n">hotkey</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">=</span> <span class="n">rank</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span> <span class="o">=</span> <span class="n">peer_count</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bandwidth</span> <span class="o">=</span> <span class="n">bandwidth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">world_size</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validator_addr</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validator_port</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wallet</span> <span class="o">=</span> <span class="n">wallet</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dendrite</span><span class="p">:</span> <span class="n">bt</span><span class="o">.</span><span class="n">dendrite</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">dendrite</span><span class="p">(</span><span class="n">wallet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">wallet</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port_range</span> <span class="o">=</span> <span class="n">port_range</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">benchmark_max_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">benchmark_max_size</span><span class="p">)</span>
+        
+        <span class="c1"># Set port range for gloo</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;GLOO_PORT_RANGE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">port_range</span>
+        
+        <span class="k">if</span> <span class="n">benchmark_max_size</span><span class="p">:</span>
+            <span class="n">data_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">benchmark_max_size</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
+            <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Max benchmark size: </span><span class="si">{</span><span class="n">human_readable_size</span><span class="p">(</span><span class="n">benchmark_max_size</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">temp_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">data_length</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_connect_validator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Connect to validator and get job details</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">mapreduce</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">ConnectMaster</span><span class="p">(</span>
+            <span class="n">version</span><span class="o">=</span><span class="n">get_my_version</span><span class="p">(),</span>
+            <span class="n">job</span><span class="o">=</span><span class="n">mapreduce</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">Job</span><span class="p">(</span>
+                <span class="n">rank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span>
+                <span class="n">peer_count</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span><span class="p">,</span>
+                <span class="n">bandwidth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bandwidth</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+        
+        <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;External IP: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dendrite</span><span class="o">.</span><span class="n">external_ip</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">set_gloo_socket_ifname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dendrite</span><span class="o">.</span><span class="n">external_ip</span><span class="p">)</span>
+
+        <span class="n">response</span><span class="p">:</span> <span class="n">mapreduce</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">ConnectMaster</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dendrite</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+            <span class="n">axons</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axons</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">validator_uid</span><span class="p">],</span>
+            <span class="n">synapse</span> <span class="o">=</span> <span class="n">query</span><span class="p">,</span>
+            <span class="n">timeout</span> <span class="o">=</span> <span class="mi">30</span>
+        <span class="p">)</span>
+        <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s2">&quot;🔵 Response from validator&quot;</span><span class="p">)</span>
+        <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">job</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">job</span><span class="o">.</span><span class="n">reason</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">job</span><span class="o">.</span><span class="n">status</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unable to connect to validator&quot;</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">world_size</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">job</span><span class="o">.</span><span class="n">world_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">master_addr</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">job</span><span class="o">.</span><span class="n">master_addr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">master_port</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">job</span><span class="o">.</span><span class="n">master_port</span>
+
+<div class="viewcode-block" id="Peer.init_process_group"><a class="viewcode-back" href="../../peer.html#mapreduce.peer.Peer.init_process_group">[docs]</a>    <span class="k">def</span> <span class="nf">init_process_group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Connect to validator and get job details, initialize process group.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_connect_validator</span><span class="p">()</span>
+        
+        <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Joining group tcp://</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">master_addr</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">master_port</span><span class="si">}</span><span class="s2"> rank: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">dist</span><span class="o">.</span><span class="n">init_process_group</span><span class="p">(</span>
+            <span class="n">init_method</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tcp://</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">master_addr</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">master_port</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;gloo&#39;</span><span class="p">,</span>
+            <span class="n">rank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span>
+            <span class="n">world_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">world_size</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Initialized process group&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_groups</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_init_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create groups</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peers</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">new_group</span><span class="p">(</span><span class="n">ranks</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">miners</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">new_group</span><span class="p">(</span><span class="n">ranks</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peer_miners</span> <span class="o">=</span> <span class="p">[</span><span class="n">dist</span><span class="o">.</span><span class="n">new_group</span><span class="p">(</span><span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="n">peer_rank</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span> <span class="k">for</span> <span class="n">peer_rank</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">miner_peers</span> <span class="o">=</span> <span class="p">[</span><span class="n">dist</span><span class="o">.</span><span class="n">new_group</span><span class="p">(</span><span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="n">miner_rank</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span> <span class="k">for</span> <span class="n">miner_rank</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validator_rank1</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">new_group</span><span class="p">(</span><span class="n">ranks</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Groups created&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Peer.destroy_process_group"><a class="viewcode-back" href="../../peer.html#mapreduce.peer.Peer.destroy_process_group">[docs]</a>    <span class="k">def</span> <span class="nf">destroy_process_group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Send exit signal to validator, destroy process group</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;🔔 Action: Exit&quot;</span><span class="p">)</span>
+            <span class="n">dist</span><span class="o">.</span><span class="n">broadcast_object_list</span><span class="p">([{</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;exit&#39;</span> <span class="p">}],</span> <span class="n">src</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validator_rank1</span><span class="p">)</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[{}]</span> 
+        <span class="n">dist</span><span class="o">.</span><span class="n">broadcast_object_list</span><span class="p">(</span><span class="n">actions</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">actions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;exit&#39;</span><span class="p">:</span>
+            <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;🟢 Received </span><span class="se">\033</span><span class="s1">[91mexit</span><span class="se">\033</span><span class="s1">[0m signal&#39;</span><span class="p">)</span>
+        <span class="n">dist</span><span class="o">.</span><span class="n">destroy_process_group</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_scatter_to_miners</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Each peer scatters tensor to all miners</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Inform validator to scatter tensor to all miners</span>
+        <span class="n">chunks</span> <span class="o">=</span> <span class="n">chunk_with_padding</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span><span class="p">)</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">chunks</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="c1"># concat temp + chunks</span>
+        <span class="n">chunks</span> <span class="o">=</span> <span class="p">[</span><span class="n">temp</span><span class="p">]</span> <span class="o">+</span> <span class="n">chunks</span>
+        <span class="c1"># calculate tensor size in bytes</span>
+        <span class="n">tensor_size</span> <span class="o">=</span> <span class="n">tensor</span><span class="o">.</span><span class="n">element_size</span><span class="p">()</span> <span class="o">*</span> <span class="n">tensor</span><span class="o">.</span><span class="n">nelement</span><span class="p">()</span>
+
+        <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⌛ Broadcasting </span><span class="se">\033</span><span class="s2">[92m</span><span class="si">{</span><span class="n">human_readable_size</span><span class="p">(</span><span class="n">tensor_size</span><span class="p">)</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">)</span>
+        <span class="n">dist</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">chunks</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">peer_miners</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">del</span> <span class="n">temp</span>
+        <span class="k">del</span> <span class="n">chunks</span>
+        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+        <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;✅ Broadcast finished&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_gather_from_miners</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">chunk_shape</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gather data from miners</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">gather_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">chunk_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;⌛ Gathering ...&quot;</span><span class="p">)</span>
+        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+        <span class="n">dist</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">gather_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">gather_list</span><span class="p">,</span> <span class="n">dst</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">peer_miners</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;✅ Gather finished&quot;</span><span class="p">)</span>
+        <span class="n">merged_chunks</span> <span class="o">=</span> <span class="n">merge_chunks</span><span class="p">(</span><span class="n">gather_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">del</span> <span class="n">gather_list</span>
+        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">merged_chunks</span>
+
+    <span class="k">def</span> <span class="nf">_reduce_from_peers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Each peer gathers chunks from all miners</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;⌛ Waiting for Reducing ...&#39;</span><span class="p">)</span>
+        <span class="n">chunks</span> <span class="o">=</span> <span class="n">chunk_with_padding</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span><span class="p">)</span>
+        <span class="n">handles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span><span class="p">):</span>
+            <span class="n">miner_rank</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">dst</span><span class="o">=</span><span class="n">miner_rank</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">miner_peers</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">async_op</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span><span class="p">):</span>
+            <span class="n">handles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+            <span class="k">del</span> <span class="n">chunks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">tensor</span>
+        <span class="k">del</span> <span class="n">chunks</span>
+        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+        <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;✅ Reduced to all miners&#39;</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="Peer.broadcast"><a class="viewcode-back" href="../../peer.html#mapreduce.peer.Peer.broadcast">[docs]</a>    <span class="k">def</span> <span class="nf">broadcast</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Rank1 broadcasts the tensor to the all peers </span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            tensor (Tensor): Data to be sent if current process is rank1, and tensor to be used to save received data otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;🔔 Send Action: broadcast&#39;</span><span class="p">)</span>
+            <span class="n">chunk_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">ceil</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="n">dist</span><span class="o">.</span><span class="n">broadcast_object_list</span><span class="p">([{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;broadcast&#39;</span><span class="p">,</span> 
+                <span class="s1">&#39;src&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> 
+                <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+                <span class="s1">&#39;chunk_shape&#39;</span><span class="p">:</span> <span class="n">chunk_shape</span><span class="p">,</span>
+                <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="n">tensor</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+                <span class="p">}],</span> <span class="n">src</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validator_rank1</span><span class="p">)</span>
+            <span class="n">actions</span> <span class="o">=</span> <span class="p">[{}]</span> 
+            <span class="n">dist</span><span class="o">.</span><span class="n">broadcast_object_list</span><span class="p">(</span><span class="n">actions</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔔 Action: </span><span class="si">{</span><span class="n">actions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_scatter_to_miners</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">actions</span> <span class="o">=</span> <span class="p">[{}]</span> 
+            <span class="n">dist</span><span class="o">.</span><span class="n">broadcast_object_list</span><span class="p">(</span><span class="n">actions</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="n">actions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔔 Action: </span><span class="si">{</span><span class="n">action</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gather_from_miners</span><span class="p">(</span><span class="n">action</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">],</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;dtype&#39;</span><span class="p">],</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;chunk_shape&#39;</span><span class="p">])</span></div>
+        
+<div class="viewcode-block" id="Peer.all_reduce"><a class="viewcode-back" href="../../peer.html#mapreduce.peer.Peer.all_reduce">[docs]</a>    <span class="k">def</span> <span class="nf">all_reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reduces the tensor data across all peers in such a way that all get the final result. (average)</span>
+<span class="sd">        After the call tensor is going to be bitwise identical in all processes.</span>
+<span class="sd">        Complex tensors are supported.</span>
+
+<span class="sd">        Args</span>
+<span class="sd">            tensor (Tensor): Input and output of the collective. The function operates in-place.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[{}]</span> 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;🔔 Action: ALL_REDUCE&#39;</span><span class="p">)</span>
+            <span class="n">chunk_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">ceil</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;all_reduce&#39;</span><span class="p">,</span> 
+                <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+                <span class="s1">&#39;chunk_shape&#39;</span><span class="p">:</span> <span class="n">chunk_shape</span><span class="p">,</span>
+                <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="n">tensor</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="n">actions</span> <span class="o">=</span> <span class="p">[</span><span class="n">action</span><span class="p">]</span>
+            <span class="n">dist</span><span class="o">.</span><span class="n">broadcast_object_list</span><span class="p">(</span><span class="n">actions</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validator_rank1</span><span class="p">)</span>
+        <span class="n">dist</span><span class="o">.</span><span class="n">broadcast_object_list</span><span class="p">(</span><span class="n">actions</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">actions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">tensor_size</span> <span class="o">=</span> <span class="n">tensor</span><span class="o">.</span><span class="n">element_size</span><span class="p">()</span> <span class="o">*</span> <span class="n">tensor</span><span class="o">.</span><span class="n">nelement</span><span class="p">()</span>
+        <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔔 Action: </span><span class="si">{</span><span class="n">action</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">  </span><span class="se">\033</span><span class="s2">[92m</span><span class="si">{</span><span class="n">human_readable_size</span><span class="p">(</span><span class="n">tensor_size</span><span class="p">)</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">)</span>
+        
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_from_peers</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">tensor</span>
+        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gather_from_miners</span><span class="p">(</span><span class="n">action</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">],</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;dtype&#39;</span><span class="p">],</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;chunk_shape&#39;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Peer.request_benchmark"><a class="viewcode-back" href="../../peer.html#mapreduce.peer.Peer.request_benchmark">[docs]</a>    <span class="k">def</span> <span class="nf">request_benchmark</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Request benchmark to validator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Query for Request Benchmark</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">mapreduce</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">RequestBenchmark</span><span class="p">(</span>
+            <span class="n">version</span><span class="o">=</span><span class="n">get_my_version</span><span class="p">(),</span>
+            <span class="n">job</span><span class="o">=</span><span class="n">mapreduce</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">Job</span><span class="p">(</span>
+                <span class="n">rank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span>
+                <span class="n">peer_count</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span><span class="p">,</span>
+                <span class="n">bandwidth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_max_size</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+        
+        <span class="n">set_gloo_socket_ifname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dendrite</span><span class="o">.</span><span class="n">external_ip</span><span class="p">)</span>
+
+        <span class="c1"># Send query to validator and get job</span>
+        <span class="n">response</span><span class="p">:</span> <span class="n">mapreduce</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">RequestBenchmark</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dendrite</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+            <span class="n">axons</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axons</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">validator_uid</span><span class="p">],</span>
+            <span class="n">synapse</span> <span class="o">=</span> <span class="n">query</span><span class="p">,</span>
+            <span class="n">timeout</span> <span class="o">=</span> <span class="mi">30</span>
+        <span class="p">)</span>
+            
+        <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔵 Response from validator, uid: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">validator_uid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">miner_uid</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No miner to benchmark&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+                
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">job</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span>
+            <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">job</span><span class="o">.</span><span class="n">reason</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">job</span><span class="o">.</span><span class="n">status</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unable to connect to validator&quot;</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">miner_uid</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">miner_uid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">world_size</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">job</span><span class="o">.</span><span class="n">world_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">master_addr</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">job</span><span class="o">.</span><span class="n">master_addr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">master_port</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">job</span><span class="o">.</span><span class="n">master_port</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bandwidth</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">job</span><span class="o">.</span><span class="n">bandwidth</span>
+        
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="Peer.benchmark"><a class="viewcode-back" href="../../peer.html#mapreduce.peer.Peer.benchmark">[docs]</a>    <span class="k">def</span> <span class="nf">benchmark</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Benchmark function, only benchmark bots will run this function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">request_benchmark</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⌛ Joining group tcp://</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">master_addr</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">master_port</span><span class="si">}</span><span class="s2"> rank: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        
+        <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Bandwidth: </span><span class="se">\033</span><span class="s1">[92m</span><span class="si">{</span><span class="n">human_readable_size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bandwidth</span><span class="p">)</span><span class="si">}</span><span class="se">\033</span><span class="s1">[0m&#39;</span><span class="p">)</span>
+        <span class="n">data_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bandwidth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">benchmark_max_size</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temp_tensor</span><span class="p">[:</span><span class="n">data_length</span><span class="p">]</span>
+        
+        <span class="n">dist</span><span class="o">.</span><span class="n">init_process_group</span><span class="p">(</span>
+            <span class="n">init_method</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tcp://</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">master_addr</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">master_port</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;gloo&#39;</span><span class="p">,</span>
+            <span class="n">rank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span>
+            <span class="n">world_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">world_size</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Initialized process group&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_groups</span><span class="p">()</span>
+        
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[{}]</span> 
+        <span class="n">chunk_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">ceil</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">peer_count</span><span class="p">),</span> <span class="p">)</span> <span class="o">+</span> <span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;all_reduce&#39;</span><span class="p">,</span> 
+            <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+            <span class="s1">&#39;chunk_shape&#39;</span><span class="p">:</span> <span class="n">chunk_shape</span><span class="p">,</span>
+            <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="n">tensor</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+            <span class="s1">&#39;miner_uid&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">miner_uid</span>
+        <span class="p">}</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[</span><span class="n">action</span><span class="p">]</span>
+        <span class="n">dist</span><span class="o">.</span><span class="n">broadcast_object_list</span><span class="p">(</span><span class="n">actions</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validator_rank1</span><span class="p">)</span>
+        <span class="n">dist</span><span class="o">.</span><span class="n">broadcast_object_list</span><span class="p">(</span><span class="n">actions</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">actions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">tensor_size</span> <span class="o">=</span> <span class="n">tensor</span><span class="o">.</span><span class="n">element_size</span><span class="p">()</span> <span class="o">*</span> <span class="n">tensor</span><span class="o">.</span><span class="n">nelement</span><span class="p">()</span>
+        <span class="n">bt</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔔 Action: </span><span class="si">{</span><span class="n">action</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="se">\033</span><span class="s2">[92m</span><span class="si">{</span><span class="n">human_readable_size</span><span class="p">(</span><span class="n">tensor_size</span><span class="p">)</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_from_peers</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">temp_tensor</span>
+        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gather_from_miners</span><span class="p">(</span><span class="n">action</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">],</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;dtype&#39;</span><span class="p">],</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;chunk_shape&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="kc">True</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2023, Chain Dude
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span class="fa fa-book"> Read the Docs</span>
+      v: dev
+      <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+      
+      <dl>
+        <dt>Languages</dt>
+        
+           <strong> 
+          <dd><a href="/map-reduce-doc/en/dev/">en</a></dd>
+           </strong> 
+        
+          
+          <dd><a href="/map-reduce-doc/es/dev/">es</a></dd>
+          
+        
+      </dl>
+      
+      
+      <dl>
+        <dt>Versions</dt>
+        
+           <strong> 
+          <dd><a href="/map-reduce-doc/en/dev/">dev</a></dd>
+           </strong> 
+        
+          
+          <dd><a href="/map-reduce-doc/en/master/">master</a></dd>
+          
+        
+      </dl>
+      
+      
+      <dl>
+        <dt>Downloads</dt>
+        
+          <dd><a href="/map-reduce-doc/en/dev/MapReduce Subnet-docs_en_dev.pdf">pdf</a></dd>
+        
+          <dd><a href="/map-reduce-doc/en/dev/MapReduce Subnet-docs_en_dev.epub">epub</a></dd>
+        
+      </dl>
+      
+      
+      <hr/>
+      <a href="https://tech.michaelaltfield.net/2020/07/18/sphinx-rtd-github-pages-1/">Continuous Documentation</a> hosting provided by <a href="https://pages.github.com/">GitHub Pages</a>.
+ 
+    </div>
+  </div>
+
+ 
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
