@@ -122,6 +122,20 @@ class Peer:
         self.validator_rank1 = dist.new_group(ranks=(0, 1))
         bt.logging.info('Groups created')
 
+    def destroy_process_group(self):
+        """
+        Send exit signal to validator, destroy process group
+        """
+        if self.rank == 1:
+            bt.logging.info("🔔 Action: Exit")
+            dist.broadcast_object_list([{ 'type': 'exit' }], src=1, group = self.validator_rank1)
+        actions = [{}] 
+        dist.broadcast_object_list(actions, src=0)
+        action = actions[0]
+        if action['type'] == 'exit':
+            bt.logging.info(f'🟢 Received \033[91mexit\033[0m signal')
+        dist.destroy_process_group()
+
     def _scatter_to_miners(self, tensor):
         """
         Each peer scatters tensor to all miners
@@ -233,7 +247,7 @@ class Peer:
         gc.collect()
         return self._gather_from_miners(action['shape'], action['dtype'], action['chunk_shape'])
 
-    def _request_benchmark(self):
+    def request_benchmark(self):
         """
         Request benchmark to validator
         """
@@ -282,7 +296,7 @@ class Peer:
         """
         Benchmark function, only benchmark bots will run this function
         """
-        if not self._request_benchmark():
+        if not self.request_benchmark():
             return False
         
         bt.logging.info(f"⌛ Joining group tcp://{self.master_addr}:{self.master_port} rank: {self.rank}")
@@ -323,17 +337,3 @@ class Peer:
         gc.collect()
         self._gather_from_miners(action['shape'], action['dtype'], action['chunk_shape'])
         return True
-    
-    def destroy_process_group(self):
-        """
-        Send exit signal to validator, destroy process group
-        """
-        if self.rank == 1:
-            bt.logging.info("🔔 Action: Exit")
-            dist.broadcast_object_list([{ 'type': 'exit' }], src=1, group = self.validator_rank1)
-        actions = [{}] 
-        dist.broadcast_object_list(actions, src=0)
-        action = actions[0]
-        if action['type'] == 'exit':
-            bt.logging.info(f'🟢 Received \033[91mexit\033[0m signal')
-        dist.destroy_process_group()
